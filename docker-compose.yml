@@ -1,0 +1,79 @@
+version: '3.8'
+services:
+  api-gateway:
+    build: ./services/api-gateway  # Updated path to match your folder structure
+    container_name: api-gateway
+    ports:
+      - "5000:5000"
+    depends_on:
+      - account-management
+      - wallet
+      - trading
+    environment:
+      ACCOUNT_SERVICE_URL: http://account-management:5001
+      TRADING_SERVICE_URL: http://trading:5002
+      WALLET_SERVICE_URL: http://wallet:5003
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+
+  account-management:
+    build: ./services/account-management  # Updated path to match your folder structure
+    container_name: account-management
+    ports:
+      - "5001:5001"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+
+  wallet:
+    build: ./services/wallet  # Updated path to match your folder structure
+    container_name: wallet
+    ports:
+      - "5002:5002"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+
+  trading:
+    build: ./services/trading  # Updated path to match your folder structure
+    container_name: trading
+    ports:
+      - "5003:5003"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+
+  db:
+    image: mysql:8.0
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  db-data:
